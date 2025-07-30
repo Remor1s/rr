@@ -1,0 +1,56 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Shop {
+  id                  Int                  @id @default(autoincrement())
+  displayName         String
+  marketplace         String
+  apiKey              String
+  clientId            String?
+  createdAt           DateTime             @default(now())
+  MarketplaceProduct  MarketplaceProduct[]
+  Order               Order[]
+}
+
+model MoySkladProduct {
+  id          String        @id
+  name        String
+  article     String?
+  ProductLink ProductLink[]
+}
+
+model MarketplaceProduct {
+  id          String        @id
+  offerId     String
+  name        String
+  shopId      Int
+  shop        Shop          @relation(fields: [shopId], references: [id])
+  ProductLink ProductLink[]
+  @@unique([shopId, offerId])
+}
+
+model ProductLink {
+  id                   Int                @id @default(autoincrement())
+  moySkladProductId    String
+  moySkladProduct      MoySkladProduct    @relation(fields: [moySkladProductId], references: [id])
+  marketplaceProductId String
+  marketplaceProduct   MarketplaceProduct @relation(fields: [marketplaceProductId], references: [id])
+  @@unique([moySkladProductId, marketplaceProductId])
+}
+
+model Order {
+  id                String    @id
+  shopId            Int
+  shop              Shop      @relation(fields: [shopId], references: [id])
+  status            String
+  createdAt         DateTime
+  updatedAt         DateTime  @updatedAt
+  msCustomerOrderId String?
+}
